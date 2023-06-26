@@ -1,5 +1,5 @@
 const axios = require('axios');
-const config = require('config')
+const config = require('./config.json');
 
 class FinanceNewsCrawler {
   constructor(newsApiKey, openaiApiKey) {
@@ -27,11 +27,10 @@ class FinanceNewsCrawler {
 
       try {
         // Performing Sentiment Analysis with OpenAI GPT API
-        const gptPrompt = `Please analyze the following article title: "${articleTitle}". Is the sentiment of the article neutral, bullish or bearish? After that, add if the article is related to crypto, forex or stock. You need to decide to which is the article mostly related. Don't say the article has no relationship to one of these markets. You write lower-case`;
+        const gptPrompt = `Please analyze the following article title: "${articleTitle}". Check if the article has a relationship to one of those markets: forex, crypto or stock. If yes, analyze the sentiment of the article. The sentinment can be neutral, bullish or bearish. After that, add if the article is related to crypto, forex or stock. If the article is not related to financial markets, the answer must be the character -. You write lower-case`;
         const gptResponse = await axios.post(this.openaiGptUrl, {
           prompt: gptPrompt.trim(),
           model: "text-davinci-003",
-          prompt: gptPrompt,
           max_tokens: 250,
           temperature: 0.7
         }, {
@@ -43,9 +42,11 @@ class FinanceNewsCrawler {
 
         const gptData = gptResponse.data;
 
-        if (gptData && gptData.choices && gptData.choices.length > 0) {
-          const gptOutput = gptData.choices[0].text;
-
+        if (gptData?.choices?.length > 0) {
+          const gptOutput = gptData.choices[0].text.toLowerCase();
+          
+          if (gptOutput.includes("-")) continue;
+          
           if (gptOutput.includes("bullish")) {
             if (gptOutput.includes("crypto")) {
               cryptoSentimentsCountPositive++;
