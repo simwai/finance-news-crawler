@@ -1,24 +1,6 @@
 import axios from 'axios';
 import config from './config.json' assert {type:'json'};
 
-const keywords = [
-  'Bloomberg',
-  'The Wall Street Journal',
-  'Financial Times',
-  'Forbes',
-  'The Economist',
-  'CNBC',
-  'Business Insider',
-  'Investopedia',
-  'Reuters',
-  'Fortune',
-  'BTC-Echo',
-  'CoinTelegraph',
-  'Bitcoin',
-  'Ethereum',
-  'Cryptocurrency',
-];
-
 class NewsAPI {
   constructor(apiKey) {
     this.apiKey = apiKey;
@@ -44,23 +26,6 @@ class NewsAPI {
       return response.data.articles;
     } catch (error) {
       console.error('Error fetching top headlines:', error.message);
-      return [];
-    }
-  }
-
-  async fetchArticlesByKeyword(keyword) {
-    try {
-      const response = await this.client.get('/everything', {
-        params: {
-          q: keyword,
-          language: 'en',
-          sortBy: 'popularity',
-        },
-      });
-
-      return response.data.articles;
-    } catch (error) {
-      console.error(`Error fetching articles for keyword "${keyword}":`, error.message);
       return [];
     }
   }
