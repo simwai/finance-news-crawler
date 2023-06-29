@@ -10,7 +10,8 @@
     "xo": "^0.54.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "node index.js",
+    "debug": "node --inspect --trace-warnings index.js"
   },
   "author": "simwai",
   "license": "MIT",
