@@ -2,7 +2,7 @@
 
 The Finance News Crawler is a powerful tool that allows you to crawl finance news articles, perform sentiment analysis using OpenAI GPT, and generate a sentiment report for crypto, stocks, and forex markets.
 
-(50 % made ChatGPT, did this in 3 hours)
+(50 % made ChatGPT)
 
 ## Features
 
