@@ -1,4 +1,6 @@
 # Finance News Crawler
+[![XO Linter](https://img.shields.io/badge/linter-xo-blueviolet)](https://github.com/xojs/xo)
+[![VS Code](https://img.shields.io/badge/IDE-VS_Code-blue?logo=visual-studio-code)](https://code.visualstudio.com/)
 
 The Finance News Crawler is a powerful tool that allows you to crawl finance news articles, perform sentiment analysis using OpenAI GPT, and generate a sentiment report for crypto, stocks, and forex markets.
 
