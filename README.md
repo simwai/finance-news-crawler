@@ -4,7 +4,7 @@ The Finance News Crawler is a powerful tool that allows you to crawl finance new
 
 <i>50 % made ChatGPT</i>
 
-![Look here:](console-output.png)
+![](console-output.png)
 
 ## Features
 
