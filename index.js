@@ -47,7 +47,7 @@ const analyzeSentiment = async (articleTitle) => {
     return "";
   }
 
-  if (config.SENTIMENT_ANALYSIS_ALGORITHM == "vader") {
+  if (config.SENTIMENT_ANALYSIS_ALGORITHM === "vader") {
     let vaderResult = SentimentIntensityAnalyzer.polarity_scores(articleTitle);
 
     // Sort object by value descending
