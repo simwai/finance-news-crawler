@@ -1,5 +1,5 @@
 # Finance News Crawler
-[![IDE: VS Code](https://img.shields.io/badge/IDE-VS_Code-blue?logo=visual-studio-code)](https://code.visualstudio.com/)
+[![IDE: VS Code](https://img.shields.io/badge/IDE-VS_Code-blueviolet?logo=visual-studio-code)](https://code.visualstudio.com/)
 [![Style: XO Linter](https://img.shields.io/badge/linter-xo-blueviolet)](https://github.com/xojs/xo)
 [![Quality: Qodana](https://github.com/simwai/finance-news-crawler/actions/workflows/qodana.yml/badge.svg)](https://github.com/simwai/finance-news-crawler/actions/workflows/qodana.yml)
 [![Security: CodeQL](https://github.com/simwai/finance-news-crawler/actions/workflows/codeql.yml/badge.svg?branch=main&event=push)](https://github.com/simwai/finance-news-crawler/actions/workflows/codeql.yml)
