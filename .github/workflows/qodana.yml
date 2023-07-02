@@ -9,6 +9,8 @@ on:
 jobs:
   qodana:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -17,4 +19,4 @@ jobs:
         uses: JetBrains/qodana-action@v2023.1.5
       - uses: github/codeql-action/upload-sarif@v2
         with:
-           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
+          sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
