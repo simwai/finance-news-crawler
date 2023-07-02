@@ -1,71 +1,98 @@
 import axios from 'axios';
-import config from './config.json' assert {type:'json'};
+import config from './config.json' assert {type: 'json'};
 
-class NewsAPI {
-  constructor(apiKey) {
-    this.apiKey = apiKey;
-    this.baseURL = 'https://newsapi.org/v2';
-    this.client = axios.create({
-      baseURL: this.baseURL,
+const getTopHeadlines = async () => {
+  try {
+    const response = await axios.get('https://newsapi.org/v2/top-headlines', {
       params: {
-        apiKey: this.apiKey,
+        apiKey: config.NEWS_API_KEY,
+        category: 'business',
+        language: 'en',
         pageSize: 100,
       },
     });
+
+    return response.data.articles;
+  } catch (error) {
+    console.error('Error fetching top headlines:', error.message);
+    return [];
   }
+};
 
-  async getTopHeadlines() {
-    try {
-      const response = await this.client.get('/top-headlines', {
-        params: {
-          category: 'business',
-          language: 'en',
-        },
-      });
+const analyzeSentiment = async (articleTitle) => {
+  const prompt = `Act as best trader in the world and analyze the following article title: "${articleTitle}". Is the sentiment of the article neutral, bullish, or bearish? After that, specify if the article is related to cryptocurrency, forex, or stocks. You need to determine which market the article is primarily related to. Do not state that the article has no relationship to any of these markets. Write in lowercase.`;
 
-      return response.data.articles;
-    } catch (error) {
-      console.error('Error fetching top headlines:', error.message);
-      return [];
-    }
-  }
-}
-
-class OpenAIAPI {
-  constructor(apiKey) {
-    this.apiKey = apiKey;
-    this.baseURL = 'https://api.openai.com/v1';
-    this.client = axios.create({
-      baseURL: this.baseURL,
+  try {
+    const response = await axios.post('https://api.openai.com/v1/completions', {
+      prompt: prompt.trim(),
+      model: 'text-davinci-003',
+      max_tokens: 250,
+      temperature: 0.7,
+    }, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${config.OPENAI_API_KEY}`,
       },
     });
+
+    return response.data.choices[0].text;
+  } catch (error) {
+    console.error('Error analyzing sentiment:', error.message);
+    return '';
   }
+};
 
-  async analyzeSentiment(articleTitle) {
-    const prompt = `Please analyze the following article title: "${articleTitle}". Is the sentiment of the article neutral, bullish, or bearish? After that, specify if the article is related to cryptocurrency, forex, or stocks. You need to determine which market the article is primarily related to. Do not state that the article has no relationship to any of these markets. Write in lowercase.`;
+const incrementSentiment = (report, market, sentiment) => {
+  report[market][sentiment]++;
+};
 
-    try {
-      const response = await this.client.post('/completions', {
-        prompt: prompt.trim(),
-        model: 'text-davinci-003',
-        max_tokens: 250,
-        temperature: 0.7,
-      });
+const generateHashtags = async () => {
+  try {
+    const gptPrompt = 'Please suggest the most relevant SEO hashtags for finance.';
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      messages: [{ role: 'system', content: gptPrompt }],
+      max_tokens: 32,
+      temperature: 0.7,
+      model: 'gpt-3.5-turbo',
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.OPENAI_API_KEY}`,
+      },
+    });
 
-      return response.data.choices[0].text;
-    } catch (error) {
-      console.error('Error analyzing sentiment:', error.message);
-      return '';
-    }
+    const chatCompletion = response.data.choices[0].message.content;
+    const hashtags = chatCompletion.match(/#[^\s#]+/g) || [];
+
+    return hashtags.map((tag) => tag.trim());
+  } catch (error) {
+    console.error('Error generating hashtags:', error.message);
+    return [];
   }
-}
+};
 
-class SentimentReport {
-  constructor() {
-    this.report = {
+const printReport = (report, hashtags) => {
+  console.log('Sentiment Report:');
+  console.log('Stocks:');
+  console.log(`Bullish: ${report.stocks.bullish}`);
+  console.log(`Bearish: ${report.stocks.bearish}`);
+  console.log(`Neutral: ${report.stocks.neutral}`);
+  console.log('Forex:');
+  console.log(`Bullish: ${report.forex.bullish}`);
+  console.log(`Bearish: ${report.forex.bearish}`);
+  console.log(`Neutral: ${report.forex.neutral}`);
+  console.log('Cryptocurrency:');
+  console.log(`Bullish: ${report.cryptocurrency.bullish}`);
+  console.log(`Bearish: ${report.cryptocurrency.bearish}`);
+  console.log(`Neutral: ${report.cryptocurrency.neutral}`);
+  console.log('Hashtags:');
+  console.log(hashtags.join(' '));
+};
+
+const crawlFinanceNews = async () => {
+  try {
+    const articles = await getTopHeadlines();
+    const report = {
       stocks: {
         bullish: 0,
         bearish: 0,
@@ -82,115 +109,53 @@ class SentimentReport {
         neutral: 0,
       },
     };
-    this.hashtags = [];
-  }
+    let hashtags = [];
 
-  incrementSentiment(market, sentiment) {
-    this.report[market][sentiment]++;
-  }
+    for (const article of articles) {
+      const articleTitle = article.title;
+      const sentiment = await analyzeSentiment(articleTitle);
 
-  async generateHashtags() {
-    try {
-      const gptPrompt = 'Please suggest the most relevant SEO hashtags for finance.';
-      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-        messages: [{ role: 'system', content: gptPrompt }],
-        max_tokens: 32,
-        temperature: 0.7,
-        model: 'gpt-3.5-turbo',
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${config.OPENAI_API_KEY}`,
-        },
-      });
-
-      const chatCompletion = response.data.choices[0].message.content;
-      const hashtags = chatCompletion.match(/#[^\s#]+/g) || [];
-
-      this.hashtags = hashtags.map((tag) => tag.trim());
-    } catch (error) {
-      console.error('Error generating hashtags:', error.message);
-    }
-  }
-
-  printReport() {
-    console.log('Sentiment Report:');
-    console.log('Stocks:');
-    console.log(`Bullish: ${this.report.stocks.bullish}`);
-    console.log(`Bearish: ${this.report.stocks.bearish}`);
-    console.log(`Neutral: ${this.report.stocks.neutral}`);
-    console.log('Forex:');
-    console.log(`Bullish: ${this.report.forex.bullish}`);
-    console.log(`Bearish: ${this.report.forex.bearish}`);
-    console.log(`Neutral: ${this.report.forex.neutral}`);
-    console.log('Cryptocurrency:');
-    console.log(`Bullish: ${this.report.cryptocurrency.bullish}`);
-    console.log(`Bearish: ${this.report.cryptocurrency.bearish}`);
-    console.log(`Neutral: ${this.report.cryptocurrency.neutral}`);
-    console.log('Hashtags:');
-    console.log(this.hashtags.join(' '));
-  }
-}
-
-class FinanceNewsCrawler {
-  constructor(newsApiKey, openaiApiKey) {
-    this.newsAPI = new NewsAPI(newsApiKey);
-    this.openAIAPI = new OpenAIAPI(openaiApiKey);
-    this.sentimentReport = new SentimentReport();
-  }
-
-  async crawlFinanceNews() {
-    try {
-      const articles = await this.newsAPI.getTopHeadlines();
-
-      for (const article of articles) {
-        const articleTitle = article.title;
-        const sentiment = await this.openAIAPI.analyzeSentiment(articleTitle);
-
-        if (sentiment.includes('bullish')) {
-          if (sentiment.includes('crypto')) {
-            console.log('Bullish article related to crypto:', articleTitle);
-            this.sentimentReport.incrementSentiment('cryptocurrency', 'bullish');
-          } else if (sentiment.includes('stock')) {
-            console.log('Bullish article related to stocks:', articleTitle);
-            this.sentimentReport.incrementSentiment('stocks', 'bullish');
-          } else if (sentiment.includes('forex')) {
-            console.log('Bullish article related to forex:', articleTitle);
-            this.sentimentReport.incrementSentiment('forex', 'bullish');
-          }
-        } else if (sentiment.includes('bearish')) {
-          if (sentiment.includes('crypto')) {
-            console.log('Bearish article related to crypto:', articleTitle);
-            this.sentimentReport.incrementSentiment('cryptocurrency', 'bearish');
-          } else if (sentiment.includes('stock')) {
-            console.log('Bearish article related to stocks:', articleTitle);
-            this.sentimentReport.incrementSentiment('stocks', 'bearish');
-          } else if (sentiment.includes('forex')) {
-            console.log('Bearish article related to forex:', articleTitle);
-            this.sentimentReport.incrementSentiment('forex', 'bearish');
-          }
-        } else if (sentiment.includes('neutral')) {
-          if (sentiment.includes('crypto')) {
-            console.log('Neutral article related to crypto:', articleTitle);
-            this.sentimentReport.incrementSentiment('cryptocurrency', 'neutral');
-          } else if (sentiment.includes('stock')) {
-            console.log('Neutral article related to stocks:', articleTitle);
-            this.sentimentReport.incrementSentiment('stocks', 'neutral');
-          } else if (sentiment.includes('forex')) {
-            console.log('Neutral article related to forex:', articleTitle);
-            this.sentimentReport.incrementSentiment('forex', 'neutral');
-          }
+      if (sentiment.includes('bullish')) {
+        if (sentiment.includes('crypto')) {
+          console.log('Bullish article related to crypto:', articleTitle);
+          incrementSentiment(report, 'cryptocurrency', 'bullish');
+        } else if (sentiment.includes('stock')) {
+          console.log('Bullish article related to stocks:', articleTitle);
+          incrementSentiment(report, 'stocks', 'bullish');
+        } else if (sentiment.includes('forex')) {
+          console.log('Bullish article related to forex:', articleTitle);
+          incrementSentiment(report, 'forex', 'bullish');
+        }
+      } else if (sentiment.includes('bearish')) {
+        if (sentiment.includes('crypto')) {
+          console.log('Bearish article related to crypto:', articleTitle);
+          incrementSentiment(report, 'cryptocurrency', 'bearish');
+        } else if (sentiment.includes('stock')) {
+          console.log('Bearish article related to stocks:', articleTitle);
+          incrementSentiment(report, 'stocks', 'bearish');
+        } else if (sentiment.includes('forex')) {
+          console.log('Bearish article related to forex:', articleTitle);
+          incrementSentiment(report, 'forex', 'bearish');
+        }
+      } else if (sentiment.includes('neutral')) {
+        if (sentiment.includes('crypto')) {
+          console.log('Neutral article related to crypto:', articleTitle);
+          incrementSentiment(report, 'cryptocurrency', 'neutral');
+        } else if (sentiment.includes('stock')) {
+          console.log('Neutral article related to stocks:', articleTitle);
+          incrementSentiment(report, 'stocks', 'neutral');
+        } else if (sentiment.includes('forex')) {
+          console.log('Neutral article related to forex:', articleTitle);
+          incrementSentiment(report, 'forex', 'neutral');
         }
       }
-
-      await this.sentimentReport.generateHashtags();
-      this.sentimentReport.printReport();
-    } catch (error) {
-      console.error('Error crawling finance news:', error.message);
     }
-  }
-}
 
-// Usage example:
-const financeNewsCrawler = new FinanceNewsCrawler(config.NEWS_API_KEY, config.OPENAI_API_KEY);
-financeNewsCrawler.crawlFinanceNews();
+    hashtags = await generateHashtags();
+    printReport(report, hashtags);
+  } catch (error) {
+    console.error('Error crawling finance news:', error.message);
+  }
+};
+
+crawlFinanceNews();

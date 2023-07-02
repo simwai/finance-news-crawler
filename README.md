@@ -4,6 +4,8 @@ The Finance News Crawler is a powerful tool that allows you to crawl finance new
 
 (50 % made ChatGPT)
 
+![Look here:](console-output.png)
+
 ## Features
 
 - Crawls finance news articles from the web
@@ -16,9 +18,9 @@ Follow the steps below to set up the Finance News Crawler project from scratch.
 
 ### Prerequisites
 
-- Node.js (version X.X.X)
+- Node.js 16.17.0
 - News API key (sign up at [newsapi.org](https://newsapi.org) to obtain an API key)
-- OpenAI GPT API key (sign up at [openai.com](https://openai.com) to obtain an API key)
+- OpenAI API key (sign up at [openai.com](https://openai.com) to obtain an API key)
 
 ### Installation
 
@@ -44,7 +46,7 @@ Follow the steps below to set up the Finance News Crawler project from scratch.
 4. Run the project:
 
    ```bash
-   npm start
+   npm run-script run
    ```
 
 5. Wait for the Finance News Crawler to crawl the news articles and perform sentiment analysis.
