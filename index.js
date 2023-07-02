@@ -157,9 +157,14 @@ const crawlFinanceNews = async () => {
         }
       }
     }
+
+    return report
   } catch (error) {
     console.error("Error crawling finance news:", error.message);
   }
 };
 
-crawlFinanceNews();
+(async () => {
+  const report = await crawlFinanceNews();
+  if (report) printReport(report);
+})()
