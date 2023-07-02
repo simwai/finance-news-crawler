@@ -2,7 +2,7 @@
 
 The Finance News Crawler is a powerful tool that allows you to crawl finance news articles, perform sentiment analysis using OpenAI GPT, and generate a sentiment report for crypto, stocks, and forex markets.
 
-(50 % made ChatGPT)
+<i>50 % made ChatGPT</i>
 
 ![Look here:](console-output.png)
 
@@ -42,15 +42,17 @@ Follow the steps below to set up the Finance News Crawler project from scratch.
    - Rename `config.json.example` to `config.json`
    - Enter the NEWS_API_KEY
    - Enter the OPENAI_API_KEY
+   - Choose 'openai' or 'vader' as SENTIMENT_ANALYSIS_ALGORITHM 
+   </br><i>VADER (Valence Aware Dictionary and sEntiment Reasoner) is a lexicon and rule-based sentiment analysis tool that is specifically attuned to sentiments expressed in social media.</i>
 
-4. Run the project:
+1. Run the project:
 
    ```bash
    npm run-script run
    ```
 
-5. Wait for the Finance News Crawler to crawl the news articles and perform sentiment analysis.
-6. Once the process is complete, the sentiment report will be displayed in the console.
+2. Wait for the Finance News Crawler to crawl the news articles and perform sentiment analysis.
+3. Once the process is complete, the sentiment report will be displayed in the console.
 
 ## Customization
 
