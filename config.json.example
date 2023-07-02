@@ -1,4 +1,5 @@
 {
     "NEWS_API_KEY": "mimimimi",
-    "OPENAI_API_KEY": "mimimimi"
+    "OPENAI_API_KEY": "mimimimi",
+    "SENTIMENT_ANALYSIS_ALGORITHM": "openai"
 }
