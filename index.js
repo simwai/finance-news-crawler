@@ -24,27 +24,29 @@ const analyzeSentiment = async (articleTitle) => {
   let result = "";
   const prompt = `Act as best trader in the world and analyze the following article title: "${articleTitle}". Is the sentiment of the article neutral, bullish, or bearish? After that, specify if the article is related to cryptocurrency, forex, or stocks. You need to determine which market the article is primarily related to. Do not state that the article has no relationship to any of these markets. Write in lowercase.`;
 
-  try {
-    const response = await axios.post(
-      "https://api.openai.com/v1/completions",
-      {
-        prompt: prompt.trim(),
-        model: "text-davinci-003",
-        max_tokens: 250,
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.OPENAI_API_KEY}`,
+  if (config.SENTIMENT_ANALYSIS_ALGORITHM === "openai") {
+    try {
+      const response = await axios.post(
+        "https://api.openai.com/v1/completions",
+        {
+          prompt: prompt.trim(),
+          model: "text-davinci-003",
+          max_tokens: 250,
+          temperature: 0.7,
         },
-      }
-    );
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${config.OPENAI_API_KEY}`,
+          },
+        }
+      );
 
-    result = response.data.choices[0].text;
-  } catch (error) {
-    console.error("Error analyzing sentiment:", error.message);
-    return "";
+      result = response.data.choices[0].text;
+    } catch (error) {
+      console.error("Error analyzing sentiment:", error.message);
+      return "";
+    }
   }
 
   if (config.SENTIMENT_ANALYSIS_ALGORITHM === "vader") {
